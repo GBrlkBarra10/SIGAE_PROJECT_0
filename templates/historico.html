@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% from "_macros.html" import risco, situacao, cor_situacao %}
+{% block titulo %}Histórico{% endblock %}
+{% block subtitulo %}Números do plantão e chegadas{% endblock %}
+{% block conteudo %}
+{% set total = [ind.total_pacientes, 1]|max %}
+<section class="card">
+  <div class="card-head"><div><h2>Pacientes atendidos</h2>
+    <p class="sub">Quem já foi atendido sai da lista de Pacientes e fica registrado aqui.</p></div>
+    <span class="sub">{{ atendidos|length }} atendido(s)</span></div>
+  <div class="table-wrap" style="max-height:360px;overflow:auto"><table>
+    <thead><tr><th>Paciente</th><th>Risco</th><th>Médico</th><th>Chegada</th><th>Atendimento</th></tr></thead>
+    <tbody>
+      {% for a in atendidos %}
+      {% set p = s.paciente(a.paciente_id) %}
+      <tr><td><a class="rowlink" href="{{ url_for('ver_paciente', pid=p.id) }}">{{ p.nome }}</a><div class="sub">nº {{ p.id }}</div></td>
+        <td>{{ risco(a.prioridade) }}</td><td>{{ s.medico(a.medico_id).nome }}</td>
+        <td class="tnum">{{ p.chegada|datahora }}</td><td class="tnum">{{ a.inicio|hora }} – {{ a.fim|hora }}</td></tr>
+      {% else %}
+      <tr><td colspan="5" class="empty">Nenhum paciente atendido ainda.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+</section>
+<div class="grid g2">
+  <section class="card">
+    <div class="card-head"><h2>Atendimentos concluídos por médico</h2></div>
+    <div class="bars">
+      {% for m in medicos %}
+      <div class="bar"><span>{{ m.nome }}{% if m.removido %} <small class="sub">(apagado)</small>{% endif %}</span><div class="track"><div class="fill" style="width:{{ 100 * m.concluidos / maior }}%"></div></div><span class="v">{{ m.concluidos }}</span></div>
+      {% else %}
+      <div class="empty">Nenhum médico cadastrado.</div>
+      {% endfor %}
+    </div>
+  </section>
+  <section class="card">
+    <div class="card-head"><h2>Pacientes por situação</h2><span class="sub">{{ ind.total_pacientes }} no total</span></div>
+    <div class="bars">
+      {% for nome, v in ind.por_situacao %}
+      <div class="bar"><span>{{ nome }}</span><div class="track"><div class="fill" style="--bc:{{ cor_situacao(nome) }};width:{{ 100 * v / total }}%"></div></div><span class="v">{{ v }}</span></div>
+      {% endfor %}
+    </div>
+    <p class="sub" style="margin-top:16px">Espera média até ser chamado: <b>{{ ind.espera_media|duracao }}</b></p>
+  </section>
+</div>
+<div class="grid g2">
+  <section class="card">
+    <div class="card-head"><h2>Chegadas em ordem cronológica</h2></div>
+    <div class="table-wrap" style="max-height:440px;overflow:auto"><table>
+      <thead><tr><th>Chegada</th><th>Paciente</th><th>Risco</th><th>Situação</th></tr></thead>
+      <tbody>
+        {% for p in chegadas %}
+        <tr><td class="tnum">{{ p.chegada|datahora }}</td><td><a class="rowlink" href="{{ url_for('ver_paciente', pid=p.id) }}">{{ p.nome }}</a></td><td>{{ risco(p.prioridade) }}</td><td>{{ situacao(p.situacao) }}</td></tr>
+        {% else %}
+        <tr><td colspan="4" class="empty">Nenhuma chegada registrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+  <section class="card">
+    <div class="card-head"><h2>O que aconteceu</h2></div>
+    <div class="list log" style="max-height:440px;overflow:auto">
+      {% for momento, msg in eventos %}
+      <div class="li"><time>{{ momento|hora }}</time><div class="grow">{{ msg }}</div></div>
+      {% else %}
+      <div class="empty">Nada registrado ainda.</div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}
