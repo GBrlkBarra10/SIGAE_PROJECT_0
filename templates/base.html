@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  {% if auto_atualizar %}<meta http-equiv="refresh" content="60">{% endif %}
+  <title>SIGAE WEB</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  {% set menu = indicadores_menu() %}
+  <input type="checkbox" id="menu-toggle" class="menu-toggle" aria-hidden="true">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z" fill="#fff"/></svg></div>
+        <div><strong>SIGAE</strong><span>Pronto Atendimento</span></div>
+      </div>
+      <nav class="nav">
+        <a href="{{ url_for('painel') }}" class="{{ 'active' if tela == 'painel' }}"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>Painel</a>
+        <a href="{{ url_for('pacientes') }}" class="{{ 'active' if tela == 'pacientes' }}"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Pacientes{% set ativos_menu = menu.aguardando + menu.em_atendimento %}{% if ativos_menu %}<em>{{ ativos_menu }}</em>{% endif %}</a>
+        <a href="{{ url_for('fila') }}" class="{{ 'active' if tela == 'fila' }}"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Fila de espera{% if menu.aguardando %}<em>{{ menu.aguardando }}</em>{% endif %}</a>
+        <a href="{{ url_for('medicos') }}" class="{{ 'active' if tela == 'medicos' }}"><svg viewBox="0 0 24 24"><path d="M6 3v6a6 6 0 0 0 12 0V3"/><path d="M12 15v2a4 4 0 0 0 8 0v-2"/><circle cx="20" cy="13" r="2"/></svg>Médicos{% if menu.medicos_total %}<em>{{ menu.medicos_total }}</em>{% endif %}</a>
+        <a href="{{ url_for('atendimentos') }}" class="{{ 'active' if tela == 'atendimentos' }}"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Atendimentos{% if menu.em_atendimento %}<em>{{ menu.em_atendimento }}</em>{% endif %}</a>
+        <a href="{{ url_for('historico') }}" class="{{ 'active' if tela == 'historico' }}"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Histórico</a>
+        <a href="{{ url_for('estruturas') }}" class="{{ 'active' if tela == 'estruturas' }}"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><circle cx="6" cy="17" r="2.5"/><circle cx="18" cy="17" r="2.5"/><path d="M11 7l-4 8M13 7l4 8"/></svg>Estruturas</a>
+      </nav>
+      <div class="sidebar-foot">
+        <a class="btn soft small block" href="{{ url_for('exemplo') }}">Carregar dados de exemplo</a>
+        <a class="btn light small block" href="{{ url_for('limpar') }}">Limpar tudo</a>
+        <div class="note">Simulador acadêmico · dados fictícios</div>
+      </div>
+    </aside>
+    <label for="menu-toggle" class="menu-backdrop" aria-hidden="true"></label>
+
+    <div class="main">
+      <header class="topbar">
+        <label for="menu-toggle" class="menu-btn" aria-label="Abrir menu">☰</label>
+        <div class="titles">
+          <h1>{% block titulo %}{% endblock %}</h1>
+          <p>{% block subtitulo %}{% endblock %}</p>
+        </div>
+        <form class="search" action="{{ url_for('buscar') }}" method="get" role="search">
+          <input name="id" type="number" min="1" placeholder="Buscar paciente pelo nº" aria-label="Número do paciente">
+          <button type="submit">Buscar</button>
+        </form>
+        <div class="clock">{{ agora() }}</div>
+      </header>
+      <main class="view">
+        {% block conteudo %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  {% with avisos = get_flashed_messages(with_categories=true) %}
+  {% if avisos %}
+  <div class="toasts" role="status">
+    {% for categoria, texto in avisos %}<div class="toast{{ ' err' if categoria == 'erro' }}">{{ texto }}</div>{% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+</body>
+</html>
