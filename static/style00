@@ -249,3 +249,31 @@ dialog::backdrop { background: rgba(20, 50, 40, .35); }
   .kv { grid-template-columns: 1fr; gap: 2px; }
   .kv dd { margin-bottom: 8px; }
 }
+
+.nav a { text-decoration: none; }
+a.btn { text-decoration: none; }
+a.li { color: inherit; text-decoration: none; }
+a.li:hover { background: #fafdfc; }
+a.rowlink { color: var(--ink); font-weight: 700; text-decoration: none; }
+a.rowlink:hover { color: var(--mint-dark); text-decoration: underline; }
+.att a.who { color: var(--ink); text-decoration: none; }
+.att .btns > * { flex: 1; display: flex; }
+.att .btns form .btn { width: 100%; }
+td .pos { width: 30px; height: 30px; border-radius: 9px; background: var(--mint-soft); color: var(--mint-deep); display: grid; place-items: center; font-size: 13.5px; font-weight: 700; }
+form.inline { display: inline-flex; gap: 6px; align-items: center; margin: 0; }
+.narrow { max-width: 560px; }
+.narrow h2 { margin-bottom: 6px; }
+.choice form { margin: 0; }
+.choice form .btn { width: 100%; }
+.next-call form { margin: 0; }
+
+.toast { animation: tin .2s ease, tout .4s ease 4.5s forwards; }
+@keyframes tout { to { opacity: 0; transform: translateY(8px); visibility: hidden; } }
+
+.menu-toggle { position: absolute; opacity: 0; pointer-events: none; }
+.menu-btn { cursor: pointer; user-select: none; }
+.menu-backdrop { display: none; }
+@media (max-width: 900px) {
+  .menu-toggle:checked + .app .sidebar { transform: none; box-shadow: 0 0 60px rgba(0, 0, 0, .2); }
+  .menu-toggle:checked + .app .menu-backdrop { display: block; position: fixed; inset: 0; z-index: 15; background: rgba(20, 50, 40, .3); }
+}
