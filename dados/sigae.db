@@ -1,0 +1,56 @@
+CREATE TABLE IF NOT EXISTS medicos (
+    id                INTEGER PRIMARY KEY,
+    nome              TEXT    NOT NULL,
+    registro          TEXT    NOT NULL,
+    situacao          TEXT    NOT NULL CHECK (situacao IN ('Disponível', 'Em atendimento')),
+    concluidos        INTEGER NOT NULL DEFAULT 0,
+    cancelados        INTEGER NOT NULL DEFAULT 0,
+    ultima_seq        INTEGER NOT NULL DEFAULT 0,
+    ultima_atribuicao REAL,
+    atendimento_id    INTEGER,
+    removido          INTEGER NOT NULL DEFAULT 0 CHECK (removido IN (0, 1))
+);
+
+CREATE TABLE IF NOT EXISTS pacientes (
+    id             INTEGER PRIMARY KEY,
+    nome           TEXT    NOT NULL,
+    chegada        REAL    NOT NULL,
+    prioridade     INTEGER NOT NULL CHECK (prioridade BETWEEN 1 AND 5),
+    situacao       TEXT    NOT NULL CHECK (situacao IN ('Aguardando', 'Em atendimento', 'Concluído', 'Cancelado')),
+    medico_id      INTEGER REFERENCES medicos (id),
+    atendimento_id INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS atendimentos (
+    id          INTEGER PRIMARY KEY,
+    paciente_id INTEGER NOT NULL REFERENCES pacientes (id),
+    medico_id   INTEGER NOT NULL REFERENCES medicos (id),
+    prioridade  INTEGER NOT NULL,
+    inicio      REAL    NOT NULL,
+    fim         REAL,
+    situacao    TEXT    NOT NULL CHECK (situacao IN ('Em atendimento', 'Concluído', 'Cancelado')),
+    resultado   TEXT
+);
+
+CREATE TABLE IF NOT EXISTS triagens (
+    paciente_id INTEGER NOT NULL REFERENCES pacientes (id),
+    ordem       INTEGER NOT NULL,
+    momento     REAL    NOT NULL,
+    de          INTEGER,
+    para        INTEGER NOT NULL,
+    PRIMARY KEY (paciente_id, ordem)
+);
+
+CREATE TABLE IF NOT EXISTS eventos (
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    momento  REAL NOT NULL,
+    mensagem TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS controle (
+    chave TEXT PRIMARY KEY,
+    valor INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_atendimentos_paciente ON atendimentos (paciente_id);
+CREATE INDEX IF NOT EXISTS idx_atendimentos_medico   ON atendimentos (medico_id);
