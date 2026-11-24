@@ -278,7 +278,6 @@ def limpar():
                            opcoes=[("Sim, apagar tudo", "", "red", "")],
                            acao=url_for("limpar"), voltar_para=url_for("painel"))
 
-
 carregar()
 
 if __name__ == "__main__":
