@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_macros.html" import risco, situacao, seletor_risco %}
+{% block titulo %}{{ p.nome }}{% endblock %}
+{% block subtitulo %}Paciente nº {{ p.id }}{% endblock %}
+{% block conteudo %}
+{% set ativo = p.situacao in ('Aguardando', 'Em atendimento') %}
+<section class="card narrow">
+  <dl class="kv">
+    <dt>Número</dt><dd>{{ p.id }}</dd>
+    <dt>Situação</dt><dd>{{ situacao(p.situacao) }}</dd>
+    <dt>Risco</dt><dd>{% if ativo %}{{ seletor_risco(p, url_for('ver_paciente', pid=p.id)) }}{% else %}{{ risco(p.prioridade) }}{% endif %}</dd>
+    <dt>Chegada</dt><dd>{{ p.chegada|datahora }}</dd>
+    {% if posicao %}<dt>Posição na fila</dt><dd>{{ posicao }}º de {{ total_fila }}</dd>{% endif %}
+    {% if p.medico_id %}<dt>Médico</dt><dd>{{ s.medico(p.medico_id).nome }}</dd>{% endif %}
+    {% if p.triagens|length > 1 %}<dt>Reclassificações</dt><dd>
+      {% for t in p.triagens[1:] %}{{ t[0]|hora }}: {{ RISCOS[t[1]] }} → {{ RISCOS[t[2]] }}<br>{% endfor %}</dd>{% endif %}
+  </dl>
+  <div class="choice">
+    {% if ativo %}<a class="btn red" href="{{ url_for('cancelar_paciente', pid=p.id, voltar=url_for('pacientes')) }}">Cancelar cadastro do paciente</a>{% endif %}
+    <a class="btn light" href="{{ url_for('pacientes') }}">Voltar para a lista</a>
+  </div>
+</section>
+{% endblock %}
