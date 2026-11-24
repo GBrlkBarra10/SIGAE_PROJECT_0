@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_macros.html" import situacao %}
+{% block titulo %}{{ m.nome }}{% endblock %}
+{% block subtitulo %}Médico nº {{ m.id }}{% endblock %}
+{% block conteudo %}
+{% set a = s.atendimento(m.atendimento_id) if m.atendimento_id else None %}
+<section class="card narrow">
+  <dl class="kv">
+    <dt>Número</dt><dd>{{ m.id }}</dd>
+    <dt>Registro</dt><dd>{{ m.registro }}</dd>
+    <dt>Situação</dt><dd>{% if m.removido %}<span class="status st-cancel">Apagado</span>{% else %}{{ situacao(m.situacao) }}{% endif %}</dd>
+    <dt>Concluídos</dt><dd><b>{{ m.concluidos }}</b></dd>
+    <dt>Cancelados</dt><dd>{{ m.cancelados }}</dd>
+    <dt>Último paciente</dt><dd>{{ ('às ' ~ (m.ultima_atribuicao|datahora)) if m.ultima_atribuicao else 'ainda não recebeu' }}</dd>
+    <dt>Atendendo</dt><dd>{{ s.paciente(a.paciente_id).nome if a else '—' }}</dd>
+  </dl>
+  <div class="choice">
+    {% if not m.removido and not a %}<a class="btn red" href="{{ url_for('apagar_medico', mid=m.id) }}">Apagar médico</a>{% endif %}
+    <a class="btn light" href="{{ url_for('medicos') }}">Voltar para a lista</a>
+  </div>
+</section>
+{% endblock %}
