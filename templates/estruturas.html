@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block titulo %}Estruturas{% endblock %}
+{% block subtitulo %}Monitor da Hash, dos Heaps, da Rubro-Negra e da AVL em tempo real{% endblock %}
+
+{% macro arvore(d, vazio_texto) -%}
+{% if d.nos %}
+<div class="tree-wrap">
+  <svg width="{{ d.largura }}" height="{{ d.altura }}" viewBox="0 0 {{ d.largura }} {{ d.altura }}" role="img" aria-label="Desenho da árvore">
+    {% for a in d.arestas %}<line x1="{{ a.x1 }}" y1="{{ a.y1 }}" x2="{{ a.x2 }}" y2="{{ a.y2 }}" class="edge"/>{% endfor %}
+    {% for n in d.nos %}
+    <g class="node {{ n.cor }}"><title>{{ n.dica }}</title>
+      <circle cx="{{ n.x }}" cy="{{ n.y }}" r="22"/>
+      <text x="{{ n.x }}" y="{{ n.y - 2 }}" class="t1">{{ n.rotulo }}</text>
+      <text x="{{ n.x }}" y="{{ n.y + 11 }}" class="t2">{{ n.detalhe }}</text>
+    </g>
+    {% endfor %}
+  </svg>
+</div>
+{% if d.cortado %}<p class="sub" style="margin-top:8px">Árvore grande: mostrando os 6 primeiros níveis.</p>{% endif %}
+{% else %}
+<div class="empty">{{ vazio_texto }}</div>
+{% endif %}
+{%- endmacro %}
+
+{% macro heap(niveis, vazio_texto) -%}
+{% if niveis %}
+<div class="heap-levels">
+  {% for nivel in niveis %}
+  <div class="heap-level">
+    {% for it in nivel.itens %}
+    <div class="hcell {{ it.cor }}{{ ' root' if it.raiz }}">
+      <span class="i">[{{ it.pos }}]{{ ' raiz' if it.raiz }}</span><b>{{ it.rotulo }}</b><span class="i">{{ it.detalhe }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">{{ vazio_texto }}</div>
+{% endif %}
+{%- endmacro %}
+
+{% block conteudo %}
+{% if problemas %}
+<div class="notice bad"><b>!</b><div><b>Inconsistências encontradas:</b><br>{% for p in problemas %}{{ p }}<br>{% endfor %}</div></div>
+{% else %}
+<div class="notice ok"><b>✓</b><div><b>Estruturas sincronizadas.</b> A Hash, os dois Heaps, a Rubro-Negra e a AVL concordam entre si: nenhum registro órfão ou duplicado. Esta verificação roda automaticamente depois de cada operação.</div></div>
+{% endif %}
+
+<section class="card">
+  <div class="card-head"><div><h2>O que cada operação mudou</h2>
+    <p class="sub">Últimas ações feitas no sistema e a reação de cada estrutura (desde que o servidor foi ligado).</p></div></div>
+  <div class="list log">
+    {% for r in registros %}
+    <div class="li"><time>{{ r.momento|hora }}</time><div class="grow">
+      <div class="t" style="white-space:normal">{{ r.acao }}</div>
+      {% for m in r.mudancas %}<div class="s">• {{ m }}</div>{% else %}<div class="s">• nenhuma estrutura precisou mudar</div>{% endfor %}
+    </div>
+    {% if r.problemas %}<span class="status st-cancel" style="color:var(--red)">inconsistente</span>{% else %}<span class="status st-done">consistente</span>{% endif %}
+    </div>
+    {% else %}
+    <div class="empty">Faça uma operação (cadastrar, chamar, concluir…) para ver as estruturas reagindo aqui.</div>
+    {% endfor %}
+  </div>
+</section>
+
+<div class="grid g2">
+  <section class="card">
+    <div class="card-head"><div><h2>Rubro-Negra — fila por chegada</h2>
+      <p class="sub">Pacientes aguardando, chave (horário de chegada, ID)</p></div>
+      {% if erros_rb %}<span class="status st-cancel" style="color:var(--red)">inválida</span>{% else %}<span class="status st-done">5 propriedades OK</span>{% endif %}</div>
+    <div class="stats">
+      <span class="stat">Nós <b>{{ rb|length }}</b></span><span class="stat">Altura <b>{{ rb.height() }}</b></span>
+      <span class="stat">Altura negra <b>{{ altura_negra }}</b></span><span class="stat">Inserções <b>{{ rb.inserts }}</b></span>
+      <span class="stat">Remoções <b>{{ rb.removes }}</b></span><span class="stat">Rotações <b>{{ rb.rotations }}</b></span>
+      <span class="stat">Recolorações <b>{{ rb.recolors }}</b></span>
+    </div>
+    {{ arvore(desenho_rb, "Ninguém aguardando: árvore vazia.") }}
+  </section>
+  <section class="card">
+    <div class="card-head"><div><h2>AVL — memória cronológica</h2>
+      <p class="sub">Todos os pacientes, chave (horário de chegada, ID). FB = fator de balanceamento</p></div>
+      {% if erros_avl %}<span class="status st-cancel" style="color:var(--red)">inválida</span>{% else %}<span class="status st-done">balanceada</span>{% endif %}</div>
+    <div class="stats">
+      <span class="stat">Nós <b>{{ avl|length }}</b></span><span class="stat">Altura <b>{{ avl.height() }}</b></span>
+      <span class="stat">Inserções <b>{{ avl.inserts }}</b></span><span class="stat">Rotações simples <b>{{ avl.simple_rotations }}</b></span>
+      <span class="stat">Rotações duplas <b>{{ avl.double_rotations }}</b></span>
+    </div>
+    {{ arvore(desenho_avl, "Nenhum paciente cadastrado: árvore vazia.") }}
+  </section>
+</div>
+
+<div class="grid g2">
+  <section class="card">
+    <div class="card-head"><div><h2>Min-Heap de pacientes</h2>
+      <p class="sub">Chave (prioridade, chegada, ID). A raiz [0] é o próximo a ser chamado.</p></div>
+      <span class="sub">{{ s.fila_pacientes|length }} itens · {{ s.fila_pacientes.swaps }} trocas</span></div>
+    {{ heap(heap_p, "Heap vazio.") }}
+  </section>
+  <section class="card">
+    <div class="card-head"><div><h2>Min-Heap de médicos</h2>
+      <p class="sub">Chave (concluídos, última atribuição, ID). Só médicos disponíveis.</p></div>
+      <span class="sub">{{ s.fila_medicos|length }} itens · {{ s.fila_medicos.swaps }} trocas</span></div>
+    {{ heap(heap_m, "Nenhum médico disponível.") }}
+  </section>
+</div>
+
+<div class="grid g2">
+  {% for nome, h in tabelas %}
+  <section class="card">
+    <div class="card-head"><div><h2>Tabela Hash — {{ nome }}</h2>
+      <p class="sub">FNV-1a · encadeamento separado · redimensiona acima de 75% de carga</p></div></div>
+    <div class="stats">
+      <span class="stat">Itens <b>{{ h|length }}</b></span><span class="stat">Capacidade <b>{{ h.capacity }}</b></span>
+      <span class="stat">Carga <b>{{ '%.2f'|format(h.load_factor()) }}</b></span><span class="stat">Colisões <b>{{ h.collisions }}</b></span>
+      <span class="stat">Baldes com colisão <b>{{ h.colliding_buckets() }}</b></span>
+      <span class="stat">Consultas <b>{{ h.lookups }}</b> · média <b>{{ '%.2f'|format(h.average_probes()) }}</b> comparações</span>
+      <span class="stat">Redimensionamentos <b>{% for r in h.resize_log %}{{ r[0] }}→{{ r[1] }}{{ ', ' if not loop.last }}{% else %}nenhum{% endfor %}</b></span>
+    </div>
+    <div class="buckets">
+      {% for cadeia in h.snapshot() %}
+      <div class="bucket{{ ' col' if cadeia|length > 1 }}"><span class="bi">{{ loop.index0 }}</span>
+        <span class="slotline">{% for k in cadeia %}<span class="k">{{ k }}</span>{% if not loop.last %}<span class="ar">→</span>{% endif %}{% else %}<span class="ar">∅</span>{% endfor %}</span></div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}
