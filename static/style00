@@ -21,6 +21,7 @@
   --radius: 16px;
   color-scheme: light;
 }
+
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
 body { background: var(--bg); color: var(--ink); font: 15.5px/1.5 'DM Sans', 'Segoe UI', system-ui, sans-serif; }
@@ -59,3 +60,34 @@ a { color: var(--mint-dark); }
   display: flex; align-items: center; gap: 16px; padding: 16px 32px; background: var(--white);
   border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5;
 }
+.titles { flex: 1; min-width: 0; }
+.titles h1 { font-size: 22px; }
+.titles p { margin: 0; color: var(--muted); font-size: 14px; }
+.menu-btn { display: none; border: 0; background: none; font-size: 24px; padding: 4px 8px; }
+.search { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 0 4px 0 12px; }
+.search input { border: 0; background: transparent; width: 190px; height: 40px; outline: none; }
+.search button { border: 0; background: var(--mint-dark); color: #fff; border-radius: 9px; padding: 6px 12px; font-weight: 600; font-size: 14px; }
+.search:focus-within { border-color: var(--mint); box-shadow: 0 0 0 3px var(--mint-soft); }
+.clock { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--muted); font-size: 15px; }
+
+.view { padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 22px; max-width: 1360px; width: 100%; }
+
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid transparent;
+  background: var(--mint-dark); color: #fff; font-weight: 700; border-radius: 12px; padding: 11px 18px; transition: background .15s;
+}
+.btn:hover { background: var(--mint-deep); }
+.btn:disabled { background: #b8cfc7; cursor: not-allowed; }
+.btn.small { padding: 7px 13px; font-size: 14px; border-radius: 10px; }
+.btn.big { padding: 16px 28px; font-size: 17px; border-radius: 14px; }
+.btn.light { background: var(--white); color: var(--ink); border-color: var(--line); font-weight: 600; }
+.btn.light:hover { background: var(--gray-soft); }
+.btn.soft { background: var(--mint-soft); color: var(--mint-deep); }
+.btn.soft:hover { background: var(--mint-mid); }
+.btn.red { background: var(--white); color: var(--red); border-color: #f2cccc; font-weight: 600; }
+.btn.red:hover { background: var(--red-soft); }
+.btn.block { width: 100%; }
+.icon-btn { border: 0; background: none; font-size: 20px; color: var(--muted); padding: 4px 10px; border-radius: 8px; }
+.icon-btn:hover { background: var(--gray-soft); }
+
