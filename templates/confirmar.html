@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block subtitulo %}Confirme para continuar{% endblock %}
+{% block conteudo %}
+<section class="card narrow">
+  <h2>{{ titulo }}</h2>
+  <p>{{ texto }}</p>
+  <div class="choice">
+    {% for rotulo, dica, classe, valor in opcoes %}
+    <form method="post" action="{{ acao }}">
+      <input type="hidden" name="opcao" value="{{ valor }}">
+      <input type="hidden" name="voltar" value="{{ voltar_para }}">
+      <button class="btn block {{ classe }}"><span>{{ rotulo }}{% if dica %}<small>{{ dica }}</small>{% endif %}</span></button>
+    </form>
+    {% endfor %}
+    <a class="btn light" href="{{ voltar_para }}">Voltar</a>
+  </div>
+</section>
+{% endblock %}
