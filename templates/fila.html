@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_macros.html" import proxima_chamada, seletor_risco %}
+{% block titulo %}Fila de espera{% endblock %}
+{% block subtitulo %}Ordem de chamada e classificação de risco{% endblock %}
+{% block conteudo %}
+{{ proxima_chamada(prox_paciente, prox_medico, url_for('fila')) }}
+<section class="card">
+  <div class="card-head"><div><h2>Ordem de chamada</h2>
+    <p class="sub">Os mais graves são chamados primeiro; em caso de empate, quem chegou antes. Para mudar a gravidade, altere o risco na lista.</p></div></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Ordem</th><th>Paciente</th><th>Risco</th><th>Chegada</th><th>Esperando</th><th></th></tr></thead>
+    <tbody>
+      {% for p in fila %}
+      <tr><td><span class="pos">{{ loop.index }}</span></td>
+        <td><a class="rowlink" href="{{ url_for('ver_paciente', pid=p.id) }}">{{ p.nome }}</a><div class="sub">nº {{ p.id }}</div></td>
+        <td>{{ seletor_risco(p, url_for('fila')) }}</td>
+        <td class="tnum">{{ p.chegada|hora }}</td><td class="tnum">{{ p.chegada|desde }}</td>
+        <td><div class="actions"><a class="btn red small" href="{{ url_for('cancelar_paciente', pid=p.id, voltar=url_for('fila')) }}">Remover</a></div></td></tr>
+      {% else %}
+      <tr><td colspan="6" class="empty">A fila está vazia. <a href="{{ url_for('pacientes') }}">Cadastrar paciente</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endblock %}
