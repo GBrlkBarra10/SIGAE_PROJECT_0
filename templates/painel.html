@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% from "_macros.html" import risco, proxima_chamada, cartao_atendimento %}
+{% block titulo %}Painel{% endblock %}
+{% block subtitulo %}Resumo do plantão{% endblock %}
+{% block conteudo %}
+{% set tem_medico = ind.medicos_total > 0 %}{% set tem_paciente = ind.total_pacientes > 0 %}
+{% if not tem_medico or not tem_paciente %}
+<section class="card">
+  <h2>Como começar</h2>
+  <p class="sub">Três passos para o primeiro atendimento — ou use “Carregar dados de exemplo” no menu.</p>
+  <div class="steps">
+    <div class="step{{ ' done' if tem_medico }}"><div class="n">{{ '✓' if tem_medico else 1 }}</div><b>Cadastre os médicos</b><p>Informe nome e registro dos médicos de plantão.</p>
+      {% if not tem_medico %}<a class="btn soft small" href="{{ url_for('medicos') }}">Ir para Médicos</a>{% endif %}</div>
+    <div class="step{{ ' done' if tem_paciente }}"><div class="n">{{ '✓' if tem_paciente else 2 }}</div><b>Cadastre os pacientes</b><p>Informe o nome e a classificação de risco.</p>
+      {% if not tem_paciente %}<a class="btn soft small" href="{{ url_for('pacientes') }}">Ir para Pacientes</a>{% endif %}</div>
+    <div class="step"><div class="n">3</div><b>Chame o próximo</b><p>O sistema escolhe o paciente mais urgente e o médico com menos atendimentos.</p></div>
+  </div>
+</section>
+{% endif %}
+
+{{ proxima_chamada(prox_paciente, prox_medico, url_for('painel')) }}
+
+<section class="kpis">
+  <div class="kpi" style="--k:var(--amber);--k-bg:var(--amber-soft)"><div class="dot">⏳</div><div><div class="label">Aguardando</div><div class="value">{{ ind.aguardando }}</div></div></div>
+  <div class="kpi" style="--k:var(--blue);--k-bg:var(--blue-soft)"><div class="dot">♥</div><div><div class="label">Em atendimento</div><div class="value">{{ ind.em_atendimento }}</div></div></div>
+  <div class="kpi" style="--k:var(--mint-deep);--k-bg:var(--mint-soft)"><div class="dot">✓</div><div><div class="label">Concluídos</div><div class="value">{{ ind.concluidos }}</div></div></div>
+  <div class="kpi" style="--k:var(--mint-deep);--k-bg:var(--mint-soft)"><div class="dot">+</div><div><div class="label">Médicos livres</div><div class="value">{{ ind.medicos_livres }} de {{ ind.medicos_total }}</div></div></div>
+</section>
+
+<div class="grid g2">
+  <section class="card">
+    <div class="card-head"><h2>Fila de espera</h2><span class="sub">{{ fila|length }} aguardando</span></div>
+    <div class="list">
+      {% for p in fila[:6] %}
+      <a class="li" href="{{ url_for('ver_paciente', pid=p.id) }}"><div class="pos">{{ loop.index }}</div>
+        <div class="grow"><div class="t">{{ p.nome }}</div><div class="s">chegou às {{ p.chegada|hora }} · esperando há {{ p.chegada|desde }}</div></div>{{ risco(p.prioridade) }}</a>
+      {% else %}
+      <div class="empty">Ninguém aguardando.</div>
+      {% endfor %}
+      {% if fila|length > 6 %}<div class="li"><a href="{{ url_for('fila') }}">Ver todos os {{ fila|length }} pacientes da fila →</a></div>{% endif %}
+    </div>
+  </section>
+  <section class="card">
+    <div class="card-head"><h2>Em atendimento agora</h2><span class="sub">{{ ativos|length }} em andamento</span></div>
+    {% if ativos %}
+    <div class="att-list">{% for a in ativos %}{{ cartao_atendimento(a, url_for('painel')) }}{% endfor %}</div>
+    {% else %}
+    <div class="empty">Nenhum atendimento em andamento.</div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
