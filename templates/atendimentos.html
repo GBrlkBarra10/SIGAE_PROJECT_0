@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_macros.html" import situacao, proxima_chamada, cartao_atendimento %}
+{% block titulo %}Atendimentos{% endblock %}
+{% block subtitulo %}Chame, conclua ou cancele atendimentos{% endblock %}
+{% block conteudo %}
+{{ proxima_chamada(prox_paciente, prox_medico, url_for('atendimentos')) }}
+<section class="card">
+  <div class="card-head"><h2>Em atendimento agora</h2><span class="sub">{{ ativos|length }} em andamento</span></div>
+  {% if ativos %}
+  <div class="att-list">{% for a in ativos %}{{ cartao_atendimento(a, url_for('atendimentos')) }}{% endfor %}</div>
+  {% else %}
+  <div class="empty">Nenhum atendimento em andamento. Use “Chamar próximo”.</div>
+  {% endif %}
+</section>
+<section class="card">
+  <div class="card-head"><h2>Encerrados recentemente</h2></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Paciente</th><th>Médico</th><th>Horário</th><th>Resultado</th></tr></thead>
+    <tbody>
+      {% for a in encerrados %}
+      <tr><td><b>{{ s.paciente(a.paciente_id).nome }}</b></td><td>{{ s.medico(a.medico_id).nome }}</td>
+        <td class="tnum">{{ a.inicio|hora }} – {{ a.fim|hora }}</td>
+        <td>{{ situacao(a.situacao) }}{% if a.situacao == 'Cancelado' %}<div class="sub">{{ a.resultado }}</div>{% endif %}</td></tr>
+      {% else %}
+      <tr><td colspan="4" class="empty">Nenhum atendimento encerrado ainda.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endblock %}
