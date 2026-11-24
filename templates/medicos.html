@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "_macros.html" import situacao %}
+{% block titulo %}Médicos{% endblock %}
+{% block subtitulo %}Médicos de plantão{% endblock %}
+{% block conteudo %}
+<div class="grid g-form">
+  <section class="card">
+    <h2>Novo médico</h2>
+    <p class="sub" style="margin-bottom:16px">O número do médico é gerado automaticamente.</p>
+    <form class="form" method="post" action="{{ url_for('cadastrar_medico') }}" autocomplete="off">
+      <div class="field"><label for="nome">Nome do médico</label>
+        <input id="nome" name="nome" required maxlength="80" placeholder="Ex.: Dra. Ana Souza" autofocus></div>
+      <div class="field"><label for="registro">Registro profissional</label>
+        <input id="registro" name="registro" required maxlength="30" value="{{ registro_sugerido }}">
+        <span class="help">Número fictício, já preenchido para a simulação.</span></div>
+      <button class="btn" type="submit">Cadastrar médico</button>
+    </form>
+  </section>
+  <section class="card">
+    <div class="card-head"><div><h2>Médicos de plantão</h2>
+      <p class="sub">O próximo paciente vai para o médico livre com menos atendimentos concluídos.</p></div></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Nº</th><th>Médico</th><th>Situação</th><th class="num">Concluídos</th><th>Paciente atual</th><th></th></tr></thead>
+      <tbody>
+        {% for m in lista %}
+        {% set a = s.atendimento(m.atendimento_id) if m.atendimento_id else None %}
+        <tr><td class="id">{{ m.id }}</td>
+          <td><a class="rowlink" href="{{ url_for('ver_medico', mid=m.id) }}">{{ m.nome }}</a><div class="sub">{{ m.registro }}</div></td>
+          <td>{{ situacao(m.situacao, curto=True) }}</td>
+          <td class="num"><b style="font-size:17px">{{ m.concluidos }}</b></td>
+          <td>{{ s.paciente(a.paciente_id).nome if a else '—' }}</td>
+          <td><div class="actions">
+            {% if a %}
+            <span class="btn red small" aria-disabled="true" title="Conclua ou cancele o atendimento antes de apagar" style="opacity:.45;cursor:not-allowed">Apagar</span>
+            {% else %}
+            <a class="btn red small" href="{{ url_for('apagar_medico', mid=m.id) }}">Apagar</a>
+            {% endif %}
+          </div></td></tr>
+        {% else %}
+        <tr><td colspan="6" class="empty">Nenhum médico cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+</div>
+{% endblock %}
